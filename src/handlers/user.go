@@ -3,6 +3,7 @@ package handlers
 import (
 	"CrowFundingV2/src/helper"
 	"CrowFundingV2/src/modules/user"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -107,7 +108,8 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 		"is_available": isEmailExist,
 	}
 
-	metaMessage := "Email has been registered!"
+	metaMessage := "Email h" +
+		"as been registered!"
 
 	if isEmailExist {
 		metaMessage = "Email is available."
@@ -115,4 +117,34 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 
 	response := helper.APIResponse(http.StatusBadRequest, metaMessage, "success", data)
 	c.JSON(http.StatusOK, response)
+}
+
+func (handler *userHandler) UploadAvatar(c *gin.Context) {
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "Failed to upload avatar image.", "error", data)
+		c.JSON(http.StatusBadRequest, response)
+
+		return
+	}
+
+	// get from JWT Token
+	userId := 1
+	path := fmt.Sprintf("uploads/images/%d-%s", userId, file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		data := gin.H{"is_uploaded": false}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "Failed to upload avatar image.", "error", data)
+		c.JSON(http.StatusBadRequest, response)
+
+		return
+	}
+
+	_, err = handler.userService.SaveAvatar(userId, path)
+
+	data := gin.H{"is_uploaded": true}
+	response := helper.APIResponse(http.StatusUnprocessableEntity, "Avatar successfuly uploaded.", "error", data)
+	c.JSON(http.StatusBadRequest, response)
 }
