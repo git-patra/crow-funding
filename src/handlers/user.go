@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"CrowFundingV2/src/auth"
 	"CrowFundingV2/src/helper"
 	"CrowFundingV2/src/modules/user"
 	"fmt"
@@ -10,10 +11,11 @@ import (
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(service user.Service) *userHandler {
-	return &userHandler{service}
+func NewUserHandler(service user.Service, authService auth.Service) *userHandler {
+	return &userHandler{service, authService}
 }
 
 func (handler *userHandler) RegisterUser(context *gin.Context) {
@@ -33,16 +35,23 @@ func (handler *userHandler) RegisterUser(context *gin.Context) {
 	}
 
 	register, err := handler.userService.Register(userInput)
-
-	//** catch validation save to db
+	//** catch error save to db
 	if err != nil {
-		response := helper.APIResponse(http.StatusBadRequest, "Register Account Failed.", "error", nil)
+		response := helper.APIResponse(http.StatusBadRequest, "Register Account Failed.", "error", err.Error())
 		context.JSON(http.StatusBadRequest, response)
 
 		return
 	}
 
-	formatter := user.FormatUser(register, "token-token")
+	token, err := handler.authService.GenerateToken(register.ID)
+	if err != nil {
+		response := helper.APIResponse(http.StatusBadRequest, "Register Account Failed.", "error", err.Error())
+		context.JSON(http.StatusBadRequest, response)
+
+		return
+	}
+
+	formatter := user.FormatUser(register, token)
 	response := helper.APIResponse(http.StatusOK, "Account successfully registered.", "success", formatter)
 
 	context.JSON(http.StatusOK, response)
@@ -74,7 +83,16 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	formatter := user.FormatUser(login, "token-token")
+	token, err := h.authService.GenerateToken(login.ID)
+	if err != nil {
+		errorMessage := gin.H{"errors": []string{err.Error()}}
+		response := helper.APIResponse(http.StatusBadRequest, "Login Failed.", "error", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+
+		return
+	}
+
+	formatter := user.FormatUser(login, token)
 	response := helper.APIResponse(http.StatusOK, "Successfully Login.", "success", formatter)
 
 	c.JSON(http.StatusOK, response)

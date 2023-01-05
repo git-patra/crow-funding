@@ -1,6 +1,7 @@
 package main
 
 import (
+	"CrowFundingV2/src/auth"
 	"CrowFundingV2/src/handlers"
 	"CrowFundingV2/src/modules/user"
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,9 @@ func main() {
 
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	authService := auth.NewJWTService()
+
+	userHandler := handlers.NewUserHandler(userService, authService)
 
 	router := gin.Default()
 	api := router.Group("api/v1")
