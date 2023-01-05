@@ -4,6 +4,7 @@ import (
 	"CrowFundingV2/src/auth"
 	"CrowFundingV2/src/handlers"
 	"CrowFundingV2/src/modules/user"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -22,6 +23,24 @@ func main() {
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo)
 	authService := auth.NewJWTService()
+
+	token, err := authService.ValidateToken("eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.GkFDeRlaOVpcx8Ee86ANEEKyxNEqe8lydZPgArTklIvhlchJ10ytOYL43vsTRQy5")
+
+	if err != nil {
+		fmt.Println("ERROR")
+		fmt.Println("ERROR")
+		fmt.Println("ERROR")
+	}
+
+	if token.Valid {
+		fmt.Println("VALID")
+		fmt.Println("VALID")
+		fmt.Println("VALID")
+	} else {
+		fmt.Println("INVALID!")
+		fmt.Println("INVALID!")
+		fmt.Println("INVALID!")
+	}
 
 	userHandler := handlers.NewUserHandler(userService, authService)
 
