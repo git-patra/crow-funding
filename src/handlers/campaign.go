@@ -22,13 +22,12 @@ func (h campaignHandler) GetListCampaign(c *gin.Context) {
 	userID, _ := strconv.Atoi(c.Query("user_id"))
 
 	campaigns, err := h.campaignService.FindCampaigns(userID)
-
 	if err != nil {
 		response := helper.APIResponse(http.StatusBadRequest, "Get data failed!", "error", err.Error())
-		c.JSON(http.StatusBadRequest, response)
+		c.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := helper.APIResponse(http.StatusOK, "List of campaigns.", "success", campaigns)
+	response := helper.APIResponse(http.StatusOK, "List of campaigns.", "success", campaign.FormatCampaigns(campaigns))
 	c.JSON(http.StatusOK, response)
 }

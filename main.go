@@ -6,7 +6,6 @@ import (
 	"CrowFundingV2/src/helper"
 	"CrowFundingV2/src/modules/campaign"
 	"CrowFundingV2/src/modules/user"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/driver/mysql"
@@ -34,7 +33,6 @@ func main() {
 	campaignRepo := campaign.NewRepository(db)
 	campaignService := campaign.NewService(campaignRepo)
 	campaignHandler := handlers.NewCampaignHandler(campaignService, authService)
-	fmt.Println(campaignRepo.FindAll())
 
 	router := gin.Default()
 	api := router.Group("api/v1")
