@@ -25,9 +25,7 @@ func (handler *userHandler) RegisterUser(context *gin.Context) {
 	//** catch validation dto/input
 	if err != nil {
 		errors := helper.FormatValidationError(err)
-
 		errorMessage := gin.H{"errors": errors}
-
 		response := helper.APIResponse(http.StatusUnprocessableEntity, "Register Account Failed.", "error", errorMessage)
 		context.JSON(http.StatusUnprocessableEntity, response)
 
