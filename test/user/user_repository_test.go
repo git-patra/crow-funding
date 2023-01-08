@@ -3,21 +3,29 @@ package user
 import (
 	"CrowFundingV2/src/helper"
 	"CrowFundingV2/src/modules/user"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"runtime"
 	"testing"
 )
 
-func TestMain(m *testing.M) {
-	// before
-	fmt.Println("BEFORE EXECUTE ...")
+//func TestMain(m *testing.M) {
+//	// before
+//	fmt.Println("BEFORE EXECUTE ...")
+//
+//	m.Run()
+//
+//	// after
+//	fmt.Println("AFTER EXECUTE ...")
+//}
 
-	m.Run()
+func BenchmarkFindByID(b *testing.B) {
+	db, _ := helper.GetDBConnection()
+	userRepo := user.NewRepository(db)
 
-	// after
-	fmt.Println("AFTER EXECUTE ...")
+	for i := 0; i < b.N; i++ {
+		userRepo.FindById(1)
+	}
 }
 
 func TestFindByID(t *testing.T) {
@@ -56,4 +64,32 @@ func TestFindByEmail(t *testing.T) {
 	//
 	// kalo FailNow() tidak aga di eksuksi perintah dibawah nya
 	//fmt.Println("Cek FailNow() Print")
+}
+
+func TestTableTest(t *testing.T) {
+	tests := []struct {
+		name     string
+		request  int
+		expected int
+	}{
+		{
+			name:     "ID 1",
+			request:  1,
+			expected: 1,
+		},
+		{
+			name:     "ID 2",
+			request:  2,
+			expected: 2,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			db, _ := helper.GetDBConnection()
+			userRepo := user.NewRepository(db)
+			result, _ := userRepo.FindById(test.request)
+			assert.Equal(t, test.expected, result.ID, test.request)
+		})
+	}
 }
